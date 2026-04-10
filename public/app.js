@@ -696,6 +696,53 @@ function emptyState(msg) {
   return `<div class="empty-state"><div class="es-icon">◌</div>${msg}</div>`;
 }
 
+// ─── FULLSCREEN (MOBILE) ─────────────────────
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function isInStandaloneMode() {
+  return window.navigator.standalone === true ||
+         window.matchMedia('(display-mode: fullscreen)').matches ||
+         window.matchMedia('(display-mode: standalone)').matches;
+}
+
+function initFullscreen() {
+  if (!isMobile()) return;
+
+  if (isIOS()) {
+    // iOS can't do programmatic fullscreen — show install banner if not already installed
+    if (!isInStandaloneMode() && !sessionStorage.getItem('iosBannerDismissed')) {
+      const banner = document.getElementById('iosInstallBanner');
+      if (banner) {
+        setTimeout(() => banner.classList.add('visible'), 1200);
+        document.getElementById('iosInstallClose').addEventListener('click', () => {
+          banner.classList.remove('visible');
+          sessionStorage.setItem('iosBannerDismissed', '1');
+        });
+      }
+    }
+    return;
+  }
+
+  // Android / other: request fullscreen on first touch
+  if (document.documentElement.requestFullscreen && !isInStandaloneMode()) {
+    const requestFS = () => {
+      document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+      document.removeEventListener('touchstart', requestFS);
+    };
+    document.addEventListener('touchstart', requestFS, { once: true });
+
+    // Also re-enter fullscreen if user exits (e.g. via back gesture)
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement && isMobile()) {
+        setTimeout(() => {
+          document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+        }, 300);
+      }
+    });
+  }
+}
+
 // ─── DEVICE DETECTION ────────────────────────
 function isMobile() { return window.innerWidth <= 768; }
 
@@ -765,5 +812,6 @@ function startSSE() {
 
 // ─── START ────────────────────────────────────
 applyDeviceLayout();
+initFullscreen();
 startSSE();
 init();

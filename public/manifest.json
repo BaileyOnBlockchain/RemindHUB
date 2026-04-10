@@ -3,7 +3,7 @@
   "short_name": "RemindHUB",
   "description": "Task management & quant signals dashboard",
   "start_url": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0d0d14",
   "theme_color": "#00ffcc",
   "orientation": "portrait-primary",
