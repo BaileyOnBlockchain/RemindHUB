@@ -6,6 +6,9 @@ const https = require('https');
 const notifier = process.platform === 'win32' ? require('node-notifier') : null;
 const { exec } = require('child_process');
 
+process.on('uncaughtException', err => console.error('CRASH:', err));
+process.on('unhandledRejection', err => console.error('REJECTION:', err));
+
 const app = express();
 const PORT = process.env.PORT || 3747;
 

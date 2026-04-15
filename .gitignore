@@ -1,6 +1,6 @@
 node_modules/
-data/tasks.json
 data/*.json
+!data/.gitkeep
 .env
 *.log
 .DS_Store
