@@ -5,8 +5,11 @@ const https = require('https');
 const notifier = require('node-notifier');
 const { exec } = require('child_process');
 
+const cors = require('cors');
 const app = express();
-const PORT = 3747;
+const PORT = process.env.PORT || 3747;
+
+app.use(cors());
 const DATA_FILE = path.join(__dirname, 'data', 'tasks.json');
 
 // Ensure data directory exists
@@ -575,6 +578,29 @@ function checkDueNotifications() {
 }
 
 setInterval(checkDueNotifications, 60 * 1000);
+
+// --- Stripe billing ---
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? require('stripe')(process.env.STRIPE_SECRET_KEY)
+  : null;
+
+app.post('/billing/checkout', async (req, res) => {
+  if (!stripe) return res.status(503).json({ message: 'Payment system is being configured — DM @BlockchainBail on X to get access now.' });
+  const { email } = req.body;
+  if (!email || !email.includes('@')) return res.status(400).json({ message: 'Valid email required.' });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      customer_email: email,
+      line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+      success_url: (process.env.APP_URL || 'https://remindhub-production.up.railway.app') + '?subscribed=1',
+      cancel_url: 'https://odennetworkxr.com/#tools',
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   const os = require('os');
