@@ -507,5 +507,73 @@
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 </script>
+<!-- UNLOCK SCREEN -->
+<div id="unlockScreen" style="display:none; position:fixed; inset:0; background:#0a0a0f; z-index:99999; align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:#0e1117; border:1px solid rgba(0,255,204,0.2); border-radius:20px; padding:2.5rem; max-width:400px; width:100%; display:flex; flex-direction:column; gap:1.25rem; box-shadow:0 0 40px rgba(0,255,204,0.05);">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#00ffcc; letter-spacing:3px; text-transform:uppercase;">◈ RemindHUB</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; color:#fff; margin:0;">Enter your access key</h2>
+    <p style="color:rgba(255,255,255,0.45); font-size:0.875rem; line-height:1.6; margin:0;">Paste the key from your welcome email to unlock RemindHUB.</p>
+    <input id="unlockInput" type="text" placeholder="e.g. 3f9a1c2b..." autocomplete="off"
+      style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.8rem 1rem; color:#fff; font-size:0.9rem; font-family:'JetBrains Mono',monospace; outline:none; letter-spacing:1px;" />
+    <button id="unlockBtn" onclick="submitUnlockKey()"
+      style="padding:0.85rem; background:#00ffcc; color:#000; border:none; border-radius:50px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer;">
+      Unlock →
+    </button>
+    <p id="unlockMsg" style="font-size:0.8rem; color:rgba(255,255,255,0.4); text-align:center; margin:0;"></p>
+    <p style="font-size:0.75rem; color:rgba(255,255,255,0.25); text-align:center; margin:0;">No key? <a href="https://odennetworkxr.com/#tools" style="color:#00ffcc; text-decoration:none;">Subscribe here →</a></p>
+  </div>
+</div>
+
+<script>
+(function() {
+  const stored = localStorage.getItem('remindhub_key');
+  if (!stored) {
+    document.getElementById('unlockScreen').style.display = 'flex';
+  } else {
+    fetch('/api/unlock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: stored })
+    }).then(r => r.json()).then(data => {
+      if (!data.ok) {
+        localStorage.removeItem('remindhub_key');
+        document.getElementById('unlockScreen').style.display = 'flex';
+      }
+    }).catch(() => {});
+  }
+})();
+
+async function submitUnlockKey() {
+  const key = document.getElementById('unlockInput').value.trim();
+  const btn = document.getElementById('unlockBtn');
+  const msg = document.getElementById('unlockMsg');
+  if (!key) { msg.style.color = '#ef4444'; msg.textContent = 'Please enter your access key.'; return; }
+  btn.textContent = 'Checking...';
+  btn.disabled = true;
+  msg.textContent = '';
+  try {
+    const res = await fetch('/api/unlock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      localStorage.setItem('remindhub_key', key);
+      document.getElementById('unlockScreen').style.display = 'none';
+    } else {
+      msg.style.color = '#ef4444';
+      msg.textContent = data.message || 'Invalid key. Check your email and try again.';
+      btn.textContent = 'Unlock →';
+      btn.disabled = false;
+    }
+  } catch {
+    msg.style.color = '#ef4444';
+    msg.textContent = 'Connection error. Try again.';
+    btn.textContent = 'Unlock →';
+    btn.disabled = false;
+  }
+}
+</script>
 </body>
 </html>

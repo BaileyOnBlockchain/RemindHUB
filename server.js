@@ -1,10 +1,11 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
+const crypto = require('crypto');
 // node-notifier only works on desktop — skip on Railway/Linux
 const notifier = process.platform === 'win32' ? require('node-notifier') : null;
 const { exec } = require('child_process');
+const nodemailer = require('nodemailer');
 
 process.on('uncaughtException', err => console.error('CRASH:', err));
 process.on('unhandledRejection', err => console.error('REJECTION:', err));
@@ -20,6 +21,7 @@ app.use((req, res, next) => {
   next();
 });
 const DATA_FILE = path.join(__dirname, 'data', 'tasks.json');
+const KEYS_FILE = path.join(__dirname, 'data', 'keys.json');
 
 // Ensure data directory exists
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
@@ -28,8 +30,82 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
 if (!fs.existsSync(DATA_FILE)) {
   fs.writeFileSync(DATA_FILE, JSON.stringify({ tasks: [], settings: { theme: 'cyberpunk' } }));
 }
+if (!fs.existsSync(KEYS_FILE)) {
+  fs.writeFileSync(KEYS_FILE, JSON.stringify({}));
+}
+
+// --- Email setup ---
+const mailer = (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD)
+  ? nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+    })
+  : null;
+
+async function sendAccessEmail(email, key) {
+  if (!mailer) return console.log('Email not configured — key for', email, ':', key);
+  const appUrl = process.env.APP_URL || 'https://remindhub-production.up.railway.app';
+  await mailer.sendMail({
+    from: `"RemindHUB" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: 'Your RemindHUB Access Key',
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+        <h2 style="color:#00ffcc;">Welcome to RemindHUB ◈</h2>
+        <p>Thanks for subscribing! Here's your personal access key:</p>
+        <p style="font-family:monospace;font-size:1.2rem;background:#111;color:#00ffcc;padding:14px 18px;border-radius:8px;letter-spacing:2px;">${key}</p>
+        <p>Go to <a href="${appUrl}">${appUrl}</a> and enter this key to unlock the app.</p>
+        <p style="color:#888;font-size:0.85rem;">Keep this key safe — it's your login. If you lose it, reply to this email.</p>
+      </div>
+    `
+  });
+}
+
+// --- Keys helpers ---
+function readKeys() {
+  try { return JSON.parse(fs.readFileSync(KEYS_FILE, 'utf8')); } catch { return {}; }
+}
+function writeKeys(keys) {
+  fs.writeFileSync(KEYS_FILE, JSON.stringify(keys, null, 2));
+}
+
+// --- Stripe webhook (needs raw body — must come before express.json) ---
+app.post('/billing/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  if (!stripe || !process.env.STRIPE_WEBHOOK_SECRET) return res.sendStatus(400);
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const email = session.customer_email;
+    const key = crypto.randomBytes(16).toString('hex');
+    const keys = readKeys();
+    keys[key] = { email, createdAt: new Date().toISOString(), active: true };
+    writeKeys(keys);
+    sendAccessEmail(email, key).catch(err => console.error('Email error:', err));
+    console.log('Access key created for', email);
+  }
+  res.json({ received: true });
+});
 
 app.use(express.json());
+
+// --- Unlock endpoint ---
+app.post('/api/unlock', (req, res) => {
+  const { key } = req.body;
+  if (!key) return res.status(400).json({ ok: false, message: 'No key provided.' });
+  const keys = readKeys();
+  if (keys[key] && keys[key].active) {
+    res.json({ ok: true, email: keys[key].email });
+  } else {
+    res.status(401).json({ ok: false, message: 'Invalid access key.' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- SSE: real-time sync ---
