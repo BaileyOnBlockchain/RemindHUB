@@ -2,7 +2,8 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
-const notifier = require('node-notifier');
+// node-notifier only works on desktop — skip on Railway/Linux
+const notifier = process.platform === 'win32' ? require('node-notifier') : null;
 const { exec } = require('child_process');
 
 const cors = require('cors');
@@ -123,7 +124,7 @@ app.put('/api/settings', (req, res) => {
 // Notification trigger from frontend
 app.post('/api/notify', (req, res) => {
   const { title, message, urgency } = req.body;
-  notifier.notify({
+  if (notifier) notifier.notify({
     title: title || 'RemindHUB',
     message: message || 'You have a task due!',
     sound: true,
@@ -562,7 +563,7 @@ function checkDueNotifications() {
     // Notify if due within 15 min or overdue
     if (diffMin <= 15 && diffMin > -1440) {
       const label = diffMin < 0 ? 'OVERDUE' : `due in ${Math.round(diffMin)}m`;
-      notifier.notify({
+      if (notifier) notifier.notify({
         title: `RemindHUB — ${task.priority.toUpperCase()}`,
         message: `[${label}] ${task.title}`,
         sound: true,
@@ -615,7 +616,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n  RemindHUB running at:`);
   console.log(`    Local:   http://localhost:${PORT}`);
   console.log(`    Mobile:  http://${lanIP}:${PORT}\n`);
-  const url = `http://localhost:${PORT}`;
-  const cmd = process.platform === 'win32' ? `start "" "${url}"` : `open "${url}"`;
-  exec(cmd);
+  if (process.platform === 'win32') {
+    exec(`start "" "http://localhost:${PORT}"`);
+  }
 });
