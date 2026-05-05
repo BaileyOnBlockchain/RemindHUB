@@ -400,6 +400,24 @@
     <button class="theme-opt" data-theme="paper">
       <span class="theme-preview t-paper"></span> Paper
     </button>
+    <button class="theme-opt" data-theme="synthwave">
+      <span class="theme-preview t-synthwave"></span> Synthwave
+    </button>
+    <button class="theme-opt" data-theme="nord">
+      <span class="theme-preview t-nord"></span> Nord
+    </button>
+    <button class="theme-opt" data-theme="dracula">
+      <span class="theme-preview t-dracula"></span> Dracula
+    </button>
+    <button class="theme-opt" data-theme="rosegold">
+      <span class="theme-preview t-rosegold"></span> Rose Gold
+    </button>
+    <button class="theme-opt" data-theme="matrix">
+      <span class="theme-preview t-matrix"></span> Matrix
+    </button>
+    <button class="theme-opt" data-theme="sunset">
+      <span class="theme-preview t-sunset"></span> Sunset
+    </button>
   </div>
 </div>
 
@@ -526,6 +544,10 @@
 
 <script>
 (function() {
+  // Skip unlock screen when running locally
+  const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  if (isLocal) return;
+
   const stored = localStorage.getItem('remindhub_key');
   if (!stored) {
     document.getElementById('unlockScreen').style.display = 'flex';

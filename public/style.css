@@ -14,7 +14,7 @@
   --accent3:   #7b2fff;
   --text:      #e0e0f0;
   --text2:     #8888aa;
-  --text3:     #4444666;
+  --text3:     #444466;
   --danger:    #ff3366;
   --warn:      #ffaa00;
   --success:   #00ffcc;
@@ -184,6 +184,133 @@
   --glow2:     0 2px 8px rgba(196,94,10,0.15);
   --radius:    4px;
   --radius-lg: 8px;
+}
+
+[data-theme="synthwave"] {
+  --bg:        #0d0221;
+  --bg2:       #130035;
+  --bg3:       #1a0047;
+  --border:    #2d0060;
+  --accent:    #fe53bb;
+  --accent2:   #08f7fe;
+  --accent3:   #f5d300;
+  --text:      #f7d6ff;
+  --text2:     #8b5cf6;
+  --text3:     #4a2070;
+  --danger:    #fe53bb;
+  --warn:      #f5d300;
+  --success:   #08f7fe;
+  --font:      'JetBrains Mono', monospace;
+  --font2:     'Space Grotesk', sans-serif;
+  --glow:      0 0 22px rgba(254,83,187,0.55);
+  --glow2:     0 0 22px rgba(8,247,254,0.45);
+  --radius:    4px;
+  --radius-lg: 8px;
+}
+[data-theme="nord"] {
+  --bg:        #2e3440;
+  --bg2:       #3b4252;
+  --bg3:       #434c5e;
+  --border:    #4c566a;
+  --accent:    #88c0d0;
+  --accent2:   #81a1c1;
+  --accent3:   #a3be8c;
+  --text:      #eceff4;
+  --text2:     #d8dee9;
+  --text3:     #9aa3b2;
+  --danger:    #bf616a;
+  --warn:      #ebcb8b;
+  --success:   #a3be8c;
+  --font:      'Space Grotesk', sans-serif;
+  --font2:     'Space Grotesk', sans-serif;
+  --glow:      0 2px 12px rgba(136,192,208,0.2);
+  --glow2:     0 2px 12px rgba(129,161,193,0.2);
+  --radius:    8px;
+  --radius-lg: 14px;
+}
+[data-theme="dracula"] {
+  --bg:        #282a36;
+  --bg2:       #2d2f3d;
+  --bg3:       #343646;
+  --border:    #44475a;
+  --accent:    #bd93f9;
+  --accent2:   #ff79c6;
+  --accent3:   #50fa7b;
+  --text:      #f8f8f2;
+  --text2:     #6272a4;
+  --text3:     #44475a;
+  --danger:    #ff5555;
+  --warn:      #ffb86c;
+  --success:   #50fa7b;
+  --font:      'JetBrains Mono', monospace;
+  --font2:     'Space Grotesk', sans-serif;
+  --glow:      0 0 16px rgba(189,147,249,0.35);
+  --glow2:     0 0 16px rgba(255,121,198,0.35);
+  --radius:    6px;
+  --radius-lg: 12px;
+}
+[data-theme="rosegold"] {
+  --bg:        #1a0f14;
+  --bg2:       #241219;
+  --bg3:       #2e1720;
+  --border:    #4a2535;
+  --accent:    #e8a0b0;
+  --accent2:   #d4a853;
+  --accent3:   #c85a8a;
+  --text:      #f7e8ec;
+  --text2:     #8a5a6a;
+  --text3:     #553040;
+  --danger:    #e05577;
+  --warn:      #d4a853;
+  --success:   #7fba8a;
+  --font:      'Space Grotesk', sans-serif;
+  --font2:     'Space Grotesk', sans-serif;
+  --glow:      0 0 18px rgba(232,160,176,0.4);
+  --glow2:     0 0 18px rgba(212,168,83,0.3);
+  --radius:    12px;
+  --radius-lg: 20px;
+}
+[data-theme="matrix"] {
+  --bg:        #000d00;
+  --bg2:       #001500;
+  --bg3:       #001c00;
+  --border:    #003300;
+  --accent:    #00ff41;
+  --accent2:   #00b32c;
+  --accent3:   #00ff9d;
+  --text:      #c8ffc8;
+  --text2:     #3a7a3a;
+  --text3:     #1a4a1a;
+  --danger:    #ff3300;
+  --warn:      #ccff00;
+  --success:   #00ff41;
+  --font:      'JetBrains Mono', monospace;
+  --font2:     'JetBrains Mono', monospace;
+  --glow:      0 0 22px rgba(0,255,65,0.6);
+  --glow2:     0 0 22px rgba(0,255,157,0.35);
+  --radius:    2px;
+  --radius-lg: 4px;
+}
+[data-theme="sunset"] {
+  --bg:        #0f0811;
+  --bg2:       #180d1a;
+  --bg3:       #201425;
+  --border:    #3d1f44;
+  --accent:    #ff6b35;
+  --accent2:   #c77dff;
+  --accent3:   #f7c59f;
+  --text:      #ffe8d6;
+  --text2:     #7a4a55;
+  --text3:     #4a2035;
+  --danger:    #ff3c5c;
+  --warn:      #ff6b35;
+  --success:   #06d6a0;
+  --font:      'Space Grotesk', sans-serif;
+  --font2:     'Space Grotesk', sans-serif;
+  --glow:      0 0 20px rgba(255,107,53,0.45);
+  --glow2:     0 0 20px rgba(199,125,255,0.35);
+  --radius:    10px;
+  --radius-lg: 18px;
 }
 
 /* ---------- RESET & BASE ---------- */
@@ -926,6 +1053,12 @@ select.form-input { cursor: pointer; }
 .t-ocean     { background: linear-gradient(135deg, #020c18 50%, #00b4d8); }
 .t-clean     { background: linear-gradient(135deg, #f5f5f7 50%, #5b5bd6); }
 .t-paper     { background: linear-gradient(135deg, #faf8f0 50%, #c45e0a); }
+.t-synthwave { background: linear-gradient(135deg, #0d0221 40%, #fe53bb 75%, #08f7fe); }
+.t-nord      { background: linear-gradient(135deg, #2e3440 50%, #88c0d0); }
+.t-dracula   { background: linear-gradient(135deg, #282a36 50%, #bd93f9); }
+.t-rosegold  { background: linear-gradient(135deg, #1a0f14 40%, #e8a0b0 75%, #d4a853); }
+.t-matrix    { background: linear-gradient(135deg, #000d00 50%, #00ff41); }
+.t-sunset    { background: linear-gradient(135deg, #0f0811 40%, #ff6b35 70%, #c77dff); }
 
 /* ---------- MISC ---------- */
 .empty-state {

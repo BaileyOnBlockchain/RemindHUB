@@ -96,6 +96,11 @@ app.use(express.json());
 
 // --- Unlock endpoint ---
 app.post('/api/unlock', (req, res) => {
+  // Always allow access from localhost
+  const ip = req.ip || req.connection.remoteAddress || '';
+  if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
+    return res.json({ ok: true, email: 'owner' });
+  }
   const { key } = req.body;
   if (!key) return res.status(400).json({ ok: false, message: 'No key provided.' });
   const keys = readKeys();
